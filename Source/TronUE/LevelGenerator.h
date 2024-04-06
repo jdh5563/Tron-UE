@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "GenerateLevel.generated.h"
+#include "LevelGenerator.generated.h"
 
 UCLASS()
-class TRONUE_API AGenerateLevel : public AActor
+class TRONUE_API ALevelGenerator : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AGenerateLevel();
+	ALevelGenerator();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,4 +23,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+private:
+	UPROPERTY(EditAnywhere)
+	int gridWidth = 25;
+	UPROPERTY(EditAnywhere)
+	int gridHeight = 25;
+
+	TArray<AActor*> grid;
+
+	UFUNCTION(BlueprintCallable)
+	TArray<AActor*> GenerateLevel(TSubclassOf<AActor> wallBP);
 };
