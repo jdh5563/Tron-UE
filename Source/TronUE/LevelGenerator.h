@@ -28,8 +28,22 @@ private:
 	int gridWidth = 25;
 	UPROPERTY(EditAnywhere)
 	int gridHeight = 25;
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float wallRatio = 0.2f;
 
 	TArray<AActor*> grid;
+
+	/// <summary>
+	/// Builds the floor and walls of the level
+	/// </summary>
+	/// <param name="wallBP">A class reference for the walls of the level</param>
+	void BuildLevelOutline(TSubclassOf<AActor> wallBP);
+
+	/// <summary>
+	/// Generates obstacles within the level
+	/// </summary>
+	/// <param name="wallBP">A class reference for the walls of the level</param>
+	void GenerateObstacles(TSubclassOf<AActor> wallBP);
 
 	UFUNCTION(BlueprintCallable)
 	TArray<AActor*> GenerateLevel(TSubclassOf<AActor> wallBP);
