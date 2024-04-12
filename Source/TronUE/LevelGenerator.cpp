@@ -70,33 +70,34 @@ void ALevelGenerator::GenerateObstacles(TSubclassOf<AActor> wallBP)
 		int wallLength = FMath::RandRange(minWallLength, maxWallLength);
 		int wallHeight = FMath::RandRange(minWallHeight, maxWallHeight);
 
-		//Vector2Int randomPos = new Vector2Int(Random.Range(0, grid.GetLength(0)), Random.Range(0, grid.GetLength(1)));
-		//int spawnAttempts = 0;
+		FVector randomPos(FMath::RandRange(2, gridWidth - 3), FMath::RandRange(2, gridHeight - 3), 0);
+		int spawnAttempts = 0;
 
-		//// Only allow the position to be one that wasn't already used to generate a wall and is in-bounds
-		//// NOTE: WALLS ARE ALLOWED TO OVERLAP WHEN GENERATED THIS WAY
-		//while (grid[randomPos.x, randomPos.y].tag == "Wall" || randomPos.x + wallHeight >= gridHeight || randomPos.y + wallLength >= gridWidth)
-		//{
-		//	randomPos = new Vector2Int(Random.Range(0, grid.GetLength(0)), Random.Range(0, grid.GetLength(1)));
-		//	spawnAttempts++;
+		// Only allow the position to be one that wasn't already used to generate a wall and is in-bounds
+		// NOTE: WALLS ARE ALLOWED TO OVERLAP WHEN GENERATED THIS WAY
+		while (grid[gridHeight * randomPos.Y + randomPos.X] != nullptr || randomPos.Y + wallHeight >= gridHeight - 1 || randomPos.X + wallLength >= gridWidth - 1)
+		{
+			randomPos = FVector(FMath::RandRange(2, gridWidth - 3), FMath::RandRange(2, gridHeight - 3), 0);
+			spawnAttempts++;
 
-		//	// Stop trying after 10 attempts to prevent an infinite loop in the event that a new wall cannot be generated
-		//	if (spawnAttempts > 10) return;
-		//}
+			// Stop trying after 10 attempts to prevent an infinite loop in the event that a new wall cannot be generated
+			if (spawnAttempts > 10) break;
+		}
 
-		//// Add the wall to the world, replacing the tiles that already exist
-		//for (int i = 0; i < wallHeight; i++)
-		//{
-		//	for (int j = 0; j < wallLength; j++)
-		//	{
-		//		Destroy(grid[randomPos.x + i, randomPos.y + j]);
+		// Add the wall to the world, replacing the tiles that already exist
+		for (int i = 0; i < wallHeight; i++)
+		{
+			for (int j = 0; j < wallLength; j++)
+			{
+				if(IsValid(grid[gridHeight * (randomPos.Y + i) + randomPos.X + j])) grid[gridHeight * (randomPos.Y + i) + randomPos.X + j]->Destroy();
 
-		//		GameObject wall = Instantiate(wallPrefab, new Vector3((randomPos.y + j) * 5, 5, (randomPos.x + i) * 5), Quaternion.identity, wallContainer.transform);
-		//		grid[randomPos.x + i, randomPos.y + j] = wall;
-		//	}
-		//}
+				AActor* wall = GetWorld()->SpawnActor<AActor>(wallBP);
+				wall->SetActorLocation(FVector((randomPos.X + j) * 100, (randomPos.Y + i) * 100, randomPos.Z));
+				grid[gridHeight * (randomPos.Y + i) + randomPos.X + j] = wall;
+			}
+		}
 
-		//numWalls -= wallLength * wallHeight;
+		numWalls -= wallLength * wallHeight;
 	}
 }
 
@@ -113,6 +114,9 @@ TArray<AActor*> ALevelGenerator::GenerateLevel(TSubclassOf<AActor> wallBP)
 
 	// Build walls
 	BuildLevelOutline(wallBP);
+
+	// Generate Obstacles
+	GenerateObstacles(wallBP);
 
 	return grid;
 }
